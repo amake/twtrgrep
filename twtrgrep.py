@@ -53,33 +53,33 @@ def search(pattern, username, max_count=None):
 
 
 def main():
-    parser = ArgumentParser(
-        description='Search through tweets')
-    parser.add_argument('pattern', help='search pattern (regexp)')
-    parser.add_argument('username', nargs='?',
-                        help='the @ handle to search (the signed-in user if unspecified)')
-    parser.add_argument('--ignore-case', '-i', action='store_true',
-                        help='perform case-insensitive matching')
-    parser.add_argument('--max-count', '-m', type=int,
-                        help='maximum number of matches')
-    parser.add_argument('--verbose', '-v', action='count', default=0)
-    args = parser.parse_args()
+    try:
+        parser = ArgumentParser(
+            description='Search through tweets')
+        parser.add_argument('pattern', help='search pattern (regexp)')
+        parser.add_argument('username', nargs='?',
+                            help='the @ handle to search (the signed-in user if unspecified)')
+        parser.add_argument('--ignore-case', '-i', action='store_true',
+                            help='perform case-insensitive matching')
+        parser.add_argument('--max-count', '-m', type=int,
+                            help='maximum number of matches')
+        parser.add_argument('--verbose', '-v', action='count', default=0)
+        args = parser.parse_args()
 
-    levels = [logging.WARNING, logging.INFO, logging.DEBUG]
-    level = levels[min(len(levels) - 1, args.verbose)]
-    logging.basicConfig(level=level)
+        levels = [logging.WARNING, logging.INFO, logging.DEBUG]
+        level = levels[min(len(levels) - 1, args.verbose)]
+        logging.basicConfig(level=level)
 
-    flags = 0
-    if args.ignore_case:
-        flags |= re.IGNORECASE
-    pattern = re.compile(args.pattern, flags=flags)
-    logging.debug('Pattern: %s', pattern)
+        flags = 0
+        if args.ignore_case:
+            flags |= re.IGNORECASE
+        pattern = re.compile(args.pattern, flags=flags)
+        logging.debug('Pattern: %s', pattern)
 
-    search(pattern, args.username, max_count=args.max_count)
+        search(pattern, args.username, max_count=args.max_count)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()
