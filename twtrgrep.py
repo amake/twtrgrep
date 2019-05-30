@@ -27,13 +27,13 @@ api = tweepy.API(auth)
 
 
 def _iter_tweets(user=None):
-    for status in tweepy.Cursor(api.user_timeline, id=user).items():
+    for status in tweepy.Cursor(api.user_timeline, id=user, tweet_mode='extended').items():
         yield status
 
 
 def _find_matches(pattern, username):
     for tweet in _iter_tweets(username):
-        if pattern.search(tweet.text):
+        if pattern.search(tweet.full_text):
             yield tweet
 
 
@@ -42,7 +42,7 @@ def _get_url(tweet):
 
 
 def _format_result(tweet):
-    return f'{_get_url(tweet)}: {tweet.text}'
+    return f'{_get_url(tweet)}: {tweet.full_text}'
 
 
 def search(pattern, username, max_count=None):
