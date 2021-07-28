@@ -33,7 +33,9 @@ target_to_method = {
 
 
 def _iter_tweets(method, user=None):
-    for status in tweepy.Cursor(method, id=user, tweet_mode='extended').items():
+    for status in tweepy.Cursor(method, id=user, tweet_mode='extended',
+                                wait_on_rate_limit=True,
+                                wait_on_rate_limit_notify=True).items():
         yield status
 
 
