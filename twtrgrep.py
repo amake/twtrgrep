@@ -25,14 +25,21 @@ auth.set_access_token(credentials['AccessToken'],
 
 api = tweepy.API(auth)
 
+# Default is first key
+target_to_method = {
+    'timeline': api.user_timeline,
+    'favorites': api.favorites,
+}
 
-def _iter_tweets(user=None):
-    for status in tweepy.Cursor(api.user_timeline, id=user, tweet_mode='extended').items():
+
+def _iter_tweets(method, user=None):
+    for status in tweepy.Cursor(method, id=user, tweet_mode='extended').items():
         yield status
 
 
-def _find_matches(pattern, username):
-    for tweet in _iter_tweets(username):
+def _find_matches(pattern, target, username):
+    method = target_to_method[target]
+    for tweet in _iter_tweets(method, username):
         if pattern.search(tweet.full_text):
             yield tweet
 
@@ -45,8 +52,8 @@ def _format_result(tweet):
     return f'{_get_url(tweet)}: {tweet.full_text}'
 
 
-def search(pattern, username, max_count=None):
-    for i, result in enumerate(_find_matches(pattern, username)):
+def search(pattern, target, username, max_count=None):
+    for i, result in enumerate(_find_matches(pattern, target, username)):
         print(_format_result(result))
         if max_count is not None and i + 1 >= max_count:
             return
@@ -58,11 +65,15 @@ def main():
             description='Search through tweets')
         parser.add_argument('pattern', help='search pattern (regexp)')
         parser.add_argument('username', nargs='?',
-                            help='the @ handle to search (the signed-in user if unspecified)')
+                            help='the @ handle to search'
+                            ' (the signed-in user if unspecified)')
         parser.add_argument('--ignore-case', '-i', action='store_true',
                             help='perform case-insensitive matching')
         parser.add_argument('--max-count', '-m', type=int,
                             help='maximum number of matches')
+        parser.add_argument('--target', '-t', choices=target_to_method.keys(),
+                            default=list(target_to_method.keys())[0],
+                            help='what to search')
         parser.add_argument('--verbose', '-v', action='count', default=0)
         args = parser.parse_args()
 
@@ -76,7 +87,7 @@ def main():
         pattern = re.compile(args.pattern, flags=flags)
         logging.debug('Pattern: %s', pattern)
 
-        search(pattern, args.username, max_count=args.max_count)
+        search(pattern, args.target, args.username, max_count=args.max_count)
     except KeyboardInterrupt:
         pass
 
