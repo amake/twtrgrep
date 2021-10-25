@@ -2,7 +2,11 @@ from __future__ import print_function
 import os
 import tweepy
 import json
-import subprocess
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 def write_creds(creds):
